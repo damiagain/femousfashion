@@ -2,11 +2,12 @@ import React, { lazy } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { categories } from '../data/categories';
-import { products } from '../data/products';
+import { useProductsStore } from '../data/productStore';
 import { testimonials } from '../data/testimonials';
 import { ProductCard } from '../components/ProductCard';
 import { StarRating } from '../components/StarRating';
 export function HomePage() {
+  const { products } = useProductsStore();
   const featuredProducts = products.filter((p) => p.featured).slice(0, 3);
   return (
     <main className="flex min-h-screen flex-col bg-[#FDFBF7] pb-20 md:pb-0">

@@ -9,12 +9,12 @@ import {
 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { products as initialProducts } from '../../data/products';
+import { useProductsStore } from '../../data/productStore';
 import { categories } from '../../data/categories';
 import { Product } from '../../types';
 import { formatPrice } from '../../data/cartStore';
 export function AdminProducts() {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const { products, addProduct, updateProduct, removeProduct } = useProductsStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -103,19 +103,17 @@ export function AdminProducts() {
       new Date().toISOString()
     };
     if (editingProduct) {
-      setProducts(
-        products.map((p) => p.id === editingProduct.id ? newProduct : p)
-      );
+      updateProduct(newProduct);
       toast.success('Product updated successfully');
     } else {
-      setProducts([newProduct, ...products]);
+      addProduct(newProduct);
       toast.success('Product added successfully');
     }
     setIsModalOpen(false);
   };
   const handleDelete = () => {
     if (productToDelete) {
-      setProducts(products.filter((p) => p.id !== productToDelete.id));
+      removeProduct(productToDelete.id);
       toast.success('Product deleted successfully');
       setIsDeleteModalOpen(false);
       setProductToDelete(null);
@@ -271,7 +269,7 @@ export function AdminProducts() {
       {/* Add/Edit Modal */}
       <AnimatePresence>
         {isModalOpen &&
-        <>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
             initial={{
               opacity: 0
@@ -282,7 +280,7 @@ export function AdminProducts() {
             exit={{
               opacity: 0
             }}
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setIsModalOpen(false)} />
           
             <motion.div
@@ -301,7 +299,7 @@ export function AdminProducts() {
               scale: 0.95,
               y: 20
             }}
-            className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[95%] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+            className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
             
               <div className="mb-6 flex items-center justify-between sticky top-0 bg-white pb-4 border-b border-gray-100 z-10">
                 <h2 className="font-fraunces text-2xl text-[#2B3A55]">
@@ -492,14 +490,14 @@ export function AdminProducts() {
                 </div>
               </form>
             </motion.div>
-          </>
+          </div>
         }
       </AnimatePresence>
 
       {/* Delete Confirmation Modal */}
       <AnimatePresence>
         {isDeleteModalOpen &&
-        <>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
             initial={{
               opacity: 0
@@ -510,7 +508,7 @@ export function AdminProducts() {
             exit={{
               opacity: 0
             }}
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setIsDeleteModalOpen(false)} />
           
             <motion.div
@@ -526,7 +524,7 @@ export function AdminProducts() {
               opacity: 0,
               scale: 0.95
             }}
-            className="fixed left-1/2 top-1/2 z-50 w-[90%] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl text-center">
+            className="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl text-center">
             
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
                 <Trash2 className="h-6 w-6 text-red-600" />
@@ -553,7 +551,7 @@ export function AdminProducts() {
                 </button>
               </div>
             </motion.div>
-          </>
+          </div>
         }
       </AnimatePresence>
     </div>);

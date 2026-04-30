@@ -8,10 +8,11 @@ import {
   Plus,
   Settings } from
 'lucide-react';
-import { products } from '../../data/products';
+import { useProductsStore } from '../../data/productStore';
 import { categories } from '../../data/categories';
 import { testimonials } from '../../data/testimonials';
 export function AdminDashboard() {
+  const { products } = useProductsStore();
   const stats = [
   {
     name: 'Total Products',

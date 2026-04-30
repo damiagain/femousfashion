@@ -10,7 +10,7 @@ import {
 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { products } from '../data/products';
+import { useProductsStore } from '../data/productStore';
 import {
   useCart,
   formatPrice,
@@ -20,6 +20,7 @@ import {
 import { ProductCard } from '../components/ProductCard';
 import { StarRating } from '../components/StarRating';
 export function ProductPage() {
+  const { products } = useProductsStore();
   const { id } = useParams<{
     id: string;
   }>();
@@ -396,7 +397,7 @@ export function ProductPage() {
       {/* Size Guide Modal */}
       <AnimatePresence>
         {isSizeGuideOpen &&
-        <>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
             <motion.div
             initial={{
               opacity: 0
@@ -407,7 +408,7 @@ export function ProductPage() {
             exit={{
               opacity: 0
             }}
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setIsSizeGuideOpen(false)} />
           
             <motion.div
@@ -426,7 +427,7 @@ export function ProductPage() {
               scale: 0.95,
               y: 20
             }}
-            className="fixed left-1/2 top-1/2 z-50 w-[90%] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl">
+            className="relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             
               <div className="mb-6 flex items-center justify-between">
                 <h3 className="font-fraunces text-2xl text-[#2B3A55]">
@@ -494,7 +495,7 @@ export function ProductPage() {
                 us via WhatsApp.
               </p>
             </motion.div>
-          </>
+          </div>
         }
       </AnimatePresence>
     </main>);

@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Filter, X, ChevronRight } from 'lucide-react';
+import { Filter, X, ChevronRight, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { products } from '../data/products';
+import { useProductsStore } from '../data/productStore';
 import { categories } from '../data/categories';
 import { ProductCard } from '../components/ProductCard';
 import { SkeletonCard } from '../components/SkeletonCard';
 export function ShopPage() {
+  const { products } = useProductsStore();
   const { categorySlug } = useParams<{
     categorySlug?: string;
   }>();
