@@ -6,8 +6,11 @@ import { useProductsStore } from '../data/productStore';
 import { testimonials } from '../data/testimonials';
 import { ProductCard } from '../components/ProductCard';
 import { StarRating } from '../components/StarRating';
+import { useSettingsStore } from '../data/settingsStore';
+
 export function HomePage() {
   const { products } = useProductsStore();
+  const { settings } = useSettingsStore();
   const featuredProducts = products.filter((p) => p.featured).slice(0, 3);
   return (
     <main className="flex min-h-screen flex-col bg-[#FDFBF7] pb-20 md:pb-0">
@@ -16,7 +19,7 @@ export function HomePage() {
         <div
           className="absolute inset-0 z-0 bg-cover bg-center"
           style={{
-            backgroundImage: `linear-gradient(rgba(43,58,85,0.4), rgba(43,58,85,0.4)), url('https://images.unsplash.com/photo-1621072156002-e2fccdc0b176?w=1600&h=1200&fit=crop')`
+            backgroundImage: `linear-gradient(rgba(43,58,85,0.4), rgba(43,58,85,0.4)), url('${settings.heroImage}')`
           }} />
         
         <div className="relative z-10 flex flex-col items-center px-4 text-center">
@@ -119,7 +122,7 @@ export function HomePage() {
             className="group relative aspect-[4/5] overflow-hidden rounded-lg bg-gray-100 transition-transform duration-200 hover:-translate-y-1 active:-translate-y-1">
             
               <img
-              src={category.image}
+              src={settings.categoryImages[category.slug] || category.image}
               alt={category.name}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy" />
@@ -185,7 +188,7 @@ export function HomePage() {
           </div>
           <div className="h-[400px] flex-1 md:h-auto">
             <img
-              src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=1000&h=1000&fit=crop"
+              src={settings.ourStoryImage}
               alt="Craftsmanship"
               className="h-full w-full object-cover"
               loading="lazy" />

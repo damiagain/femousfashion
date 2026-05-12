@@ -60,9 +60,17 @@ export function Navbar() {
           {/* Logo */}
           <Link
             to="/"
-            className="font-fraunces text-xl font-medium tracking-wide text-[#2B3A55] md:text-2xl">
-            
-            FEMOUS FASHION
+            className="flex items-center">
+            <img 
+              src="/sitelogo.png" 
+              alt="Femous Fashion Logo" 
+              className="hidden md:block h-12 object-contain" 
+            />
+            <img 
+              src="/my logo1.png" 
+              alt="Femous Fashion Logo" 
+              className="block md:hidden h-10 object-contain" 
+            />
           </Link>
 
           {/* Desktop Nav */}
@@ -152,9 +160,11 @@ export function Navbar() {
             className="fixed bottom-0 left-0 top-0 z-50 w-[80%] max-w-sm bg-[#FDFBF7] p-6 shadow-xl">
             
               <div className="flex items-center justify-between mb-8">
-                <span className="font-fraunces text-xl text-[#2B3A55]">
-                  Menu
-                </span>
+                <img 
+                  src="/my logo1.png" 
+                  alt="Femous Fashion" 
+                  className="h-8 object-contain" 
+                />
                 <button
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="p-2 text-[#2B3A55]">

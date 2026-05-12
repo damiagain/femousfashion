@@ -20,6 +20,11 @@
 html {
   scroll-behavior: smooth;
 }
+@media (min-width: 768px) {
+  html {
+    font-size: 17px;
+  }
+}
 body {
   background-color: var(--linen);
   color: var(--indigo);

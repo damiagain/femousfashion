@@ -13,12 +13,14 @@ import { useProductsStore } from '../../data/productStore';
 import { categories } from '../../data/categories';
 import { Product } from '../../types';
 import { formatPrice } from '../../data/cartStore';
+import { supabase, supabaseAdmin } from '../../lib/supabase';
 export function AdminProducts() {
   const { products, addProduct, updateProduct, removeProduct } = useProductsStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   // Form State
   const [formData, setFormData] = useState<Partial<Product>>({
     name: '',
@@ -27,7 +29,8 @@ export function AdminProducts() {
     category: 'native-wears',
     featured: false,
     inStock: true,
-    sizes: ['S', 'M', 'L', 'XL']
+    sizes: ['S', 'M', 'L', 'XL'],
+    pricingUnit: null
   });
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -47,7 +50,8 @@ export function AdminProducts() {
         category: 'native-wears',
         featured: false,
         inStock: true,
-        sizes: ['S', 'M', 'L', 'XL']
+        sizes: ['S', 'M', 'L', 'XL'],
+        pricingUnit: null
       });
       setImagePreviews([]);
       setImageFiles([]);
@@ -61,14 +65,14 @@ export function AdminProducts() {
       if (validFiles.length !== files.length) {
         toast.error('Some files were skipped because they exceed 2MB');
       }
-      const totalFiles = imageFiles.length + validFiles.length;
+      const totalFiles = imagePreviews.length + validFiles.length;
       if (totalFiles > 10) {
         toast.error('Maximum 10 images allowed');
         return;
       }
       const newFiles = [...imageFiles, ...validFiles];
       setImageFiles(newFiles);
-      // Create previews
+      
       const newPreviews = validFiles.map((f) => URL.createObjectURL(f));
       setImagePreviews([...imagePreviews, ...newPreviews]);
     }
@@ -80,36 +84,75 @@ export function AdminProducts() {
     // If it's a newly uploaded file, remove it from files array
     // Note: This is a simplified approach. In reality, you'd need to track which preview corresponds to which file/existing URL
   };
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (imagePreviews.length === 0) {
       toast.error('Please add at least one image');
       return;
     }
-    const newProduct: Product = {
-      id: editingProduct ? editingProduct.id : Date.now().toString(),
-      name: formData.name || '',
-      description: formData.description || '',
-      price: Number(formData.price) || 0,
-      category: formData.category as any,
-      images: imagePreviews,
-      featured: formData.featured || false,
-      inStock: formData.inStock ?? true,
-      sizes: formData.sizes || [],
-      rating: editingProduct ? editingProduct.rating : 0,
-      reviewCount: editingProduct ? editingProduct.reviewCount : 0,
-      createdAt: editingProduct ?
-      editingProduct.createdAt :
-      new Date().toISOString()
-    };
-    if (editingProduct) {
-      updateProduct(newProduct);
-      toast.success('Product updated successfully');
-    } else {
-      addProduct(newProduct);
-      toast.success('Product added successfully');
+    
+    setIsSaving(true);
+    try {
+      const uploadedUrls: string[] = [];
+      
+      for (const file of imageFiles) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabaseAdmin.storage
+          .from('product-images')
+          .upload(fileName, file);
+          
+        if (uploadError) {
+          throw new Error(`Failed to upload image: ${uploadError.message}`);
+        }
+        
+        const { data } = supabaseAdmin.storage
+          .from('product-images')
+          .getPublicUrl(fileName);
+          
+        uploadedUrls.push(data.publicUrl);
+      }
+      
+      const existingUrls = imagePreviews.filter(url => !url.startsWith('blob:'));
+      const finalImageUrls = [...existingUrls, ...uploadedUrls];
+
+      const newProduct: Product = {
+        id: editingProduct ? editingProduct.id : Date.now().toString(),
+        name: formData.name || '',
+        description: formData.description || '',
+        price: Number(formData.price) || 0,
+        category: formData.category as any,
+        images: finalImageUrls,
+        featured: formData.featured || false,
+        inStock: formData.inStock ?? true,
+        sizes: ['native-wears', 'casual-wears', 'street-wears'].includes(formData.category as string) ? (formData.sizes || []) : [],
+        pricingUnit: formData.category === 'fabrics' ? formData.pricingUnit || 'yard' : null,
+        rating: editingProduct ? editingProduct.rating : 0,
+        reviewCount: editingProduct ? editingProduct.reviewCount : 0,
+        createdAt: editingProduct ?
+          editingProduct.createdAt :
+          new Date().toISOString()
+      };
+
+      if (editingProduct) {
+        const success = await updateProduct(newProduct);
+        if (success) {
+          toast.success('Product updated successfully');
+          setIsModalOpen(false);
+        }
+      } else {
+        const success = await addProduct(newProduct);
+        if (success) {
+          toast.success('Product added successfully');
+          setIsModalOpen(false);
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsSaving(false);
     }
-    setIsModalOpen(false);
   };
   const handleDelete = () => {
     if (productToDelete) {
@@ -420,6 +463,68 @@ export function AdminProducts() {
                   </select>
                 </div>
 
+                {/* Conditional Size Selector */}
+                {['native-wears', 'casual-wears', 'street-wears'].includes(formData.category || '') && (
+                  <div>
+                    <label className="mb-2 block font-inter text-sm font-medium text-[#2B3A55]">
+                      Available Sizes
+                    </label>
+                    <div className="flex flex-wrap gap-4">
+                      {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+                        <label key={size} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.sizes?.includes(size) || false}
+                            onChange={(e) => {
+                              const currentSizes = formData.sizes || [];
+                              if (e.target.checked) {
+                                setFormData({ ...formData, sizes: [...currentSizes, size] });
+                              } else {
+                                setFormData({ ...formData, sizes: currentSizes.filter(s => s !== size) });
+                              }
+                            }}
+                            className="h-5 w-5 rounded border-gray-300 text-[#D4A373] focus:ring-[#D4A373]"
+                          />
+                          <span className="font-inter text-sm font-medium text-gray-700">{size}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Conditional Pricing Unit */}
+                {formData.category === 'fabrics' && (
+                  <div>
+                    <label className="mb-2 block font-inter text-sm font-medium text-[#2B3A55]">
+                      Pricing Unit
+                    </label>
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="pricingUnit"
+                          value="yard"
+                          checked={formData.pricingUnit === 'yard' || !formData.pricingUnit}
+                          onChange={() => setFormData({ ...formData, pricingUnit: 'yard' })}
+                          className="h-5 w-5 text-[#D4A373] focus:ring-[#D4A373]"
+                        />
+                        <span className="font-inter text-sm font-medium text-gray-700">Per Yard</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="pricingUnit"
+                          value="trouser"
+                          checked={formData.pricingUnit === 'trouser'}
+                          onChange={() => setFormData({ ...formData, pricingUnit: 'trouser' })}
+                          className="h-5 w-5 text-[#D4A373] focus:ring-[#D4A373]"
+                        />
+                        <span className="font-inter text-sm font-medium text-gray-700">Per Trouser</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <label className="mb-1 block font-inter text-sm font-medium text-[#2B3A55]">
                     Description
@@ -483,9 +588,10 @@ export function AdminProducts() {
                   </button>
                   <button
                   type="submit"
-                  className="rounded-lg bg-[#2B3A55] px-8 py-3 font-inter font-semibold text-white active:scale-95 transition-transform">
+                  disabled={isSaving}
+                  className="rounded-lg bg-[#2B3A55] px-8 py-3 font-inter font-semibold text-white active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed">
                   
-                    Save Product
+                    {isSaving ? 'Saving...' : 'Save Product'}
                   </button>
                 </div>
               </form>

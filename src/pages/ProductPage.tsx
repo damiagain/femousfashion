@@ -6,7 +6,9 @@ import {
   Truck,
   MessageCircle,
   Star,
-  X } from
+  X,
+  Plus,
+  Minus } from
 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -29,6 +31,7 @@ export function ProductPage() {
   const product = products.find((p) => p.id === id);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string>('');
+  const [quantity, setQuantity] = useState(1);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -58,11 +61,12 @@ export function ProductPage() {
   filter((p) => p.category === product.category && p.id !== product.id).
   slice(0, 4);
   const handleAddToCart = () => {
-    if (!selectedSize) {
+    const needsSize = ['native-wears', 'casual-wears', 'street-wears'].includes(product.category);
+    if (needsSize && !selectedSize) {
       toast.error('Please select a size');
       return;
     }
-    addItem(product, selectedSize, 1);
+    addItem(product, selectedSize, quantity);
     toast.success('Added to cart', {
       style: {
         background: '#D4A373',
@@ -72,11 +76,12 @@ export function ProductPage() {
     });
   };
   const handleWhatsAppOrder = () => {
-    if (!selectedSize) {
+    const needsSize = ['native-wears', 'casual-wears', 'street-wears'].includes(product.category);
+    if (needsSize && !selectedSize) {
       toast.error('Please select a size');
       return;
     }
-    const message = buildProductWhatsAppMessage(product, selectedSize);
+    const message = buildProductWhatsAppMessage(product, selectedSize, quantity);
     window.open(getWhatsAppLink(message), '_blank');
   };
   return (
@@ -158,6 +163,7 @@ export function ProductPage() {
             <div className="mb-6 flex items-center gap-4">
               <span className="font-inter text-xl font-semibold text-[#2B3A55] md:text-2xl">
                 {formatPrice(product.price)}
+                {product.pricingUnit ? ` / ${product.pricingUnit}` : ''}
               </span>
               <div className="flex items-center gap-2 border-l border-gray-300 pl-4">
                 <StarRating rating={product.rating} />
@@ -172,28 +178,50 @@ export function ProductPage() {
             </p>
 
             {/* Size Selector */}
-            <div className="mb-8">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="font-inter font-semibold text-[#2B3A55]">
-                  Select Size
-                </span>
-                <button
-                  onClick={() => setIsSizeGuideOpen(true)}
-                  className="font-inter text-sm text-[#D4A373] underline">
-                  
-                  Size Guide
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {product.sizes.map((size) =>
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`flex h-12 min-w-[3rem] items-center justify-center rounded-lg border px-4 font-inter text-sm font-medium transition-colors ${selectedSize === size ? 'border-[#2B3A55] bg-[#2B3A55] text-white' : 'border-gray-300 bg-white text-[#2B3A55] hover:border-[#2B3A55]'}`}>
-                  
-                    {size}
+            {['native-wears', 'casual-wears', 'street-wears'].includes(product.category) && (
+              <div className="mb-8">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="font-inter font-semibold text-[#2B3A55]">
+                    Select Size
+                  </span>
+                  <button
+                    onClick={() => setIsSizeGuideOpen(true)}
+                    className="font-inter text-sm text-[#D4A373] underline">
+                    
+                    Size Guide
                   </button>
-                )}
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {product.sizes.map((size) =>
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`flex h-12 min-w-[3rem] items-center justify-center rounded-lg border px-4 font-inter text-sm font-medium transition-colors ${selectedSize === size ? 'border-[#2B3A55] bg-[#2B3A55] text-white' : 'border-gray-300 bg-white text-[#2B3A55] hover:border-[#2B3A55]'}`}>
+                    
+                      {size}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity Selector */}
+            <div className="mb-8">
+              <span className="mb-3 block font-inter font-semibold text-[#2B3A55]">
+                Quantity
+              </span>
+              <div className="flex h-12 w-32 items-center justify-between rounded-lg border border-gray-300 px-2">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="flex h-8 w-8 items-center justify-center rounded bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="font-inter font-medium text-[#2B3A55]">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="flex h-8 w-8 items-center justify-center rounded bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+                  <Plus className="h-4 w-4" />
+                </button>
               </div>
             </div>
 
@@ -375,22 +403,30 @@ export function ProductPage() {
 
       {/* Mobile Sticky Bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:hidden">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-col">
-            <span className="font-inter text-xs text-gray-500">
-              Total Price
-            </span>
-            <span className="font-inter text-lg font-semibold text-[#2B3A55]">
-              {formatPrice(product.price)}
-            </span>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="font-inter text-xs text-gray-500">
+                Total Price
+              </span>
+              <span className="font-inter text-lg font-semibold text-[#2B3A55]">
+                {formatPrice(product.price * quantity)}
+              </span>
+            </div>
           </div>
-          <button
-            onClick={handleWhatsAppOrder}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#D4A373] py-3 font-inter font-semibold text-white active:scale-95">
-            
-            <MessageCircle className="h-5 w-5" />
-            Order via WhatsApp
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleAddToCart}
+              className="flex flex-1 items-center justify-center rounded-lg border-2 border-[#2B3A55] py-3 font-inter font-semibold text-[#2B3A55] active:scale-95 transition-colors hover:bg-[#2B3A55] hover:text-white">
+              Add to Cart
+            </button>
+            <button
+              onClick={handleWhatsAppOrder}
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#D4A373] py-3 font-inter font-semibold text-white active:scale-95">
+              <MessageCircle className="h-5 w-5" />
+              WhatsApp
+            </button>
+          </div>
         </div>
       </div>
 

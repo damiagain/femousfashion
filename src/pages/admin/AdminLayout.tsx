@@ -5,7 +5,9 @@ import {
   Package,
   Tags,
   MessageSquare,
-  LogOut } from
+  LogOut,
+  Settings as SettingsIcon,
+  Globe } from
 'lucide-react';
 export function AdminLayout() {
   const navigate = useNavigate();
@@ -40,6 +42,11 @@ export function AdminLayout() {
     name: 'Reviews',
     path: '/admin/reviews',
     icon: MessageSquare
+  },
+  {
+    name: 'Settings',
+    path: '/admin/settings',
+    icon: SettingsIcon
   }];
 
   const isActive = (path: string) => {
@@ -51,12 +58,17 @@ export function AdminLayout() {
     <div className="flex min-h-screen bg-gray-50">
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 flex-col bg-[#2B3A55] text-white md:flex">
-        <div className="flex h-20 items-center px-6 border-b border-white/10">
+        <div className="flex h-20 items-center justify-between px-6 border-b border-white/10">
           <Link
             to="/"
             className="font-fraunces text-xl font-medium tracking-wide">
-            
             FEMOUS ADMIN
+          </Link>
+          <Link
+            to="/"
+            title="View Main Site"
+            className="flex items-center justify-center rounded-lg bg-white/10 p-2 text-gray-300 hover:bg-white/20 hover:text-white transition-colors">
+            <Globe className="h-5 w-5" />
           </Link>
         </div>
         <nav className="flex-1 space-y-2 p-4">
@@ -87,10 +99,16 @@ export function AdminLayout() {
 
       {/* Main Content */}
       <main className="flex-1 pb-20 md:pb-0">
-        <div className="h-16 bg-white shadow-sm flex items-center px-4 md:px-8 border-b border-gray-200 md:hidden">
+        <div className="h-16 bg-white shadow-sm flex items-center justify-between px-4 md:px-8 border-b border-gray-200 md:hidden">
           <span className="font-fraunces text-lg text-[#2B3A55]">
             Femous Admin
           </span>
+          <Link
+            to="/"
+            className="flex items-center gap-2 rounded-lg bg-[#D4A373] px-3 py-1.5 text-xs font-semibold text-white">
+            <Globe className="h-4 w-4" />
+            View Site
+          </Link>
         </div>
         <div className="p-4 md:p-8">
           <Outlet />

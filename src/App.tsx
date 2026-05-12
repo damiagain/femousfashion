@@ -17,6 +17,9 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminProducts } from './pages/admin/AdminProducts';
 import { AdminCategories } from './pages/admin/AdminCategories';
 import { AdminReviews } from './pages/admin/AdminReviews';
+import { AdminSettings } from './pages/admin/AdminSettings';
+import { useSettingsStore } from './data/settingsStore';
+
 // Scroll to top on route change
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -37,6 +40,12 @@ function StoreLayout({ children }: {children: React.ReactNode;}) {
 
 }
 export function App() {
+  const { fetchSettings } = useSettingsStore();
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
   return (
     <BrowserRouter>
       <ScrollToTop />
@@ -91,6 +100,7 @@ export function App() {
           <Route path="products" element={<AdminProducts />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="reviews" element={<AdminReviews />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>
     </BrowserRouter>);

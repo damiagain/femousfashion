@@ -10,6 +10,7 @@ export interface Product {
   rating: number;
   reviewCount: number;
   sizes: string[];
+  pricingUnit?: 'yard' | 'trouser' | null;
   createdAt: string;
 }
 

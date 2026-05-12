@@ -62,6 +62,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center justify-between mt-auto">
             <span className="font-inter font-semibold text-[#2B3A55]">
               {formatPrice(product.price)}
+              {product.pricingUnit ? ` / ${product.pricingUnit}` : ''}
             </span>
             <div className="flex items-center gap-1">
               <StarRating rating={product.rating} size={14} />
