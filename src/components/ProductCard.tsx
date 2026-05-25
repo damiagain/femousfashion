@@ -77,12 +77,13 @@ export function ProductCard({ product }: ProductCardProps) {
       {!isAdmin && (
         <button 
           onClick={handleAddToCartClick}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-[#2B3A55] py-2 font-inter text-sm font-semibold text-[#2B3A55] transition-colors hover:bg-[#2B3A55] hover:text-white active:scale-95 md:hidden"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-[#2B3A55] py-2 font-inter text-sm font-semibold text-[#2B3A55] transition-colors hover:bg-[#2B3A55] hover:text-white active:scale-95"
         >
           <ShoppingCart className="h-4 w-4" />
           Add to Cart
         </button>
       )}
+
 
       <AnimatePresence>
         {isSizeModalOpen && (

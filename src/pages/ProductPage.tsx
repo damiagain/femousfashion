@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ChevronRight,
   ShieldCheck,
@@ -8,19 +8,19 @@ import {
   Star,
   X,
   Plus,
-  Minus } from
-'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
-import { useProductsStore } from '../data/productStore';
+  Minus,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import { useProductsStore } from "../data/productStore";
 import {
   useCart,
   formatPrice,
   buildProductWhatsAppMessage,
-  getWhatsAppLink } from
-'../data/cartStore';
-import { ProductCard } from '../components/ProductCard';
-import { StarRating } from '../components/StarRating';
+  getWhatsAppLink,
+} from "../data/cartStore";
+import { ProductCard } from "../components/ProductCard";
+import { StarRating } from "../components/StarRating";
 export function ProductPage() {
   const { products } = useProductsStore();
   const { id } = useParams<{
@@ -30,7 +30,7 @@ export function ProductPage() {
   const { addItem } = useCart();
   const product = products.find((p) => p.id === id);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,35 +54,39 @@ export function ProductPage() {
         <Link to="/shop" className="text-[#D4A373] underline">
           Return to Shop
         </Link>
-      </div>);
-
+      </div>
+    );
   }
-  const relatedProducts = products.
-  filter((p) => p.category === product.category && p.id !== product.id).
-  slice(0, 4);
+  const relatedProducts = products
+    .filter((p) => p.category === product.category && p.id !== product.id)
+    .slice(0, 4);
   const handleAddToCart = () => {
-    const needsSize = ['native-wears', 'casual-wears', 'street-wears'].includes(product.category);
+    const needsSize = product.sizes && product.sizes.length > 0;
     if (needsSize && !selectedSize) {
-      toast.error('Please select a size');
+      toast.error("Please select a size");
       return;
     }
     addItem(product, selectedSize, quantity);
-    toast.success('Added to cart', {
+    toast.success("Added to cart", {
       style: {
-        background: '#D4A373',
-        color: '#fff',
-        border: 'none'
-      }
+        background: "#D4A373",
+        color: "#fff",
+        border: "none",
+      },
     });
   };
   const handleWhatsAppOrder = () => {
-    const needsSize = ['native-wears', 'casual-wears', 'street-wears'].includes(product.category);
+    const needsSize = product.sizes && product.sizes.length > 0;
     if (needsSize && !selectedSize) {
-      toast.error('Please select a size');
+      toast.error("Please select a size");
       return;
     }
-    const message = buildProductWhatsAppMessage(product, selectedSize, quantity);
-    window.open(getWhatsAppLink(message), '_blank');
+    const message = buildProductWhatsAppMessage(
+      product,
+      selectedSize,
+      quantity,
+    );
+    window.open(getWhatsAppLink(message), "_blank");
   };
   return (
     <main className="min-h-screen bg-[#FDFBF7] pt-16 md:pt-20 pb-24 md:pb-12">
@@ -99,9 +103,9 @@ export function ProductPage() {
           <ChevronRight className="h-4 w-4" />
           <Link
             to={`/shop/${product.category}`}
-            className="hover:text-[#D4A373] capitalize">
-            
-            {product.category.replace('-', ' ')}
+            className="hover:text-[#D4A373] capitalize"
+          >
+            {product.category.replace("-", " ")}
           </Link>
         </div>
       </div>
@@ -117,39 +121,39 @@ export function ProductPage() {
                   <motion.img
                     key={selectedImage}
                     initial={{
-                      opacity: 0
+                      opacity: 0,
                     }}
                     animate={{
-                      opacity: 1
+                      opacity: 1,
                     }}
                     exit={{
-                      opacity: 0
+                      opacity: 0,
                     }}
                     transition={{
-                      duration: 0.3
+                      duration: 0.3,
                     }}
                     src={product.images[selectedImage]}
                     alt={product.name}
-                    className="h-full w-full object-cover" />
-                  
+                    className="h-full w-full object-cover"
+                  />
                 </AnimatePresence>
               </div>
 
               {/* Thumbnails */}
               <div className="flex gap-3 overflow-x-auto pb-2 md:w-24 md:flex-col md:overflow-visible md:pb-0">
-                {product.images.map((img, idx) =>
-                <button
-                  key={idx}
-                  onClick={() => setSelectedImage(idx)}
-                  className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100 md:w-full ${selectedImage === idx ? 'ring-2 ring-[#D4A373] ring-offset-2' : ''}`}>
-                  
+                {product.images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImage(idx)}
+                    className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100 md:w-full ${selectedImage === idx ? "ring-2 ring-[#D4A373] ring-offset-2" : ""}`}
+                  >
                     <img
-                    src={img}
-                    alt=""
-                    className="h-full w-full object-cover" />
-                  
+                      src={img}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
                   </button>
-                )}
+                ))}
               </div>
             </div>
           </div>
@@ -163,7 +167,7 @@ export function ProductPage() {
             <div className="mb-6 flex items-center gap-4">
               <span className="font-inter text-xl font-semibold text-[#2B3A55] md:text-2xl">
                 {formatPrice(product.price)}
-                {product.pricingUnit ? ` / ${product.pricingUnit}` : ''}
+                {product.pricingUnit ? ` / ${product.pricingUnit}` : ""}
               </span>
               <div className="flex items-center gap-2 border-l border-gray-300 pl-4">
                 <StarRating rating={product.rating} />
@@ -178,7 +182,7 @@ export function ProductPage() {
             </p>
 
             {/* Size Selector */}
-            {['native-wears', 'casual-wears', 'street-wears'].includes(product.category) && (
+            {product.sizes && product.sizes.length > 0 && (
               <div className="mb-8">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="font-inter font-semibold text-[#2B3A55]">
@@ -186,21 +190,21 @@ export function ProductPage() {
                   </span>
                   <button
                     onClick={() => setIsSizeGuideOpen(true)}
-                    className="font-inter text-sm text-[#D4A373] underline">
-                    
+                    className="font-inter text-sm text-[#D4A373] underline"
+                  >
                     Size Guide
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {product.sizes.map((size) =>
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`flex h-12 min-w-[3rem] items-center justify-center rounded-lg border px-4 font-inter text-sm font-medium transition-colors ${selectedSize === size ? 'border-[#2B3A55] bg-[#2B3A55] text-white' : 'border-gray-300 bg-white text-[#2B3A55] hover:border-[#2B3A55]'}`}>
-                    
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`flex h-12 min-w-[3rem] items-center justify-center rounded-lg border px-4 font-inter text-sm font-medium transition-colors ${selectedSize === size ? "border-[#2B3A55] bg-[#2B3A55] text-white" : "border-gray-300 bg-white text-[#2B3A55] hover:border-[#2B3A55]"}`}
+                    >
                       {size}
                     </button>
-                  )}
+                  ))}
                 </div>
               </div>
             )}
@@ -213,13 +217,17 @@ export function ProductPage() {
               <div className="flex h-12 w-32 items-center justify-between rounded-lg border border-gray-300 px-2">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="flex h-8 w-8 items-center justify-center rounded bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+                  className="flex h-8 w-8 items-center justify-center rounded bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+                >
                   <Minus className="h-4 w-4" />
                 </button>
-                <span className="font-inter font-medium text-[#2B3A55]">{quantity}</span>
+                <span className="font-inter font-medium text-[#2B3A55]">
+                  {quantity}
+                </span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="flex h-8 w-8 items-center justify-center rounded bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+                  className="flex h-8 w-8 items-center justify-center rounded bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+                >
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
@@ -229,15 +237,15 @@ export function ProductPage() {
             <div className="hidden flex-col gap-4 md:flex">
               <button
                 onClick={handleWhatsAppOrder}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#D4A373] py-4 font-inter font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]">
-                
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#D4A373] py-4 font-inter font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              >
                 <MessageCircle className="h-5 w-5" />
                 Order via WhatsApp
               </button>
               <button
                 onClick={handleAddToCart}
-                className="flex w-full items-center justify-center rounded-lg border-2 border-[#2B3A55] py-4 font-inter font-semibold text-[#2B3A55] transition-colors hover:bg-[#2B3A55] hover:text-white active:scale-[0.98]">
-                
+                className="flex w-full items-center justify-center rounded-lg border-2 border-[#2B3A55] py-4 font-inter font-semibold text-[#2B3A55] transition-colors hover:bg-[#2B3A55] hover:text-white active:scale-[0.98]"
+              >
                 Add to Cart
               </button>
             </div>
@@ -268,18 +276,18 @@ export function ProductPage() {
       </div>
 
       {/* Complete the Look */}
-      {relatedProducts.length > 0 &&
-      <section className="mx-auto mt-20 max-w-7xl px-4 md:px-8">
+      {relatedProducts.length > 0 && (
+        <section className="mx-auto mt-20 max-w-7xl px-4 md:px-8">
           <h2 className="mb-8 font-fraunces text-2xl text-[#2B3A55] md:text-3xl">
             Complete the Look
           </h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-            {relatedProducts.map((p) =>
-          <ProductCard key={p.id} product={p} />
-          )}
+            {relatedProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
         </section>
-      }
+      )}
 
       {/* Reviews Section */}
       <section className="mx-auto mt-20 max-w-7xl px-4 md:px-8">
@@ -348,9 +356,9 @@ export function ProductPage() {
                 className="flex flex-col gap-4"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  toast.success('Review submitted for approval');
-                }}>
-                
+                  toast.success("Review submitted for approval");
+                }}
+              >
                 <div>
                   <label className="mb-1 block font-inter text-sm font-medium text-[#2B3A55]">
                     Rating
@@ -365,8 +373,8 @@ export function ProductPage() {
                     <input
                       type="text"
                       required
-                      className="w-full rounded-lg border border-gray-300 p-3 font-inter outline-none focus:border-[#D4A373]" />
-                    
+                      className="w-full rounded-lg border border-gray-300 p-3 font-inter outline-none focus:border-[#D4A373]"
+                    />
                   </div>
                   <div>
                     <label className="mb-1 block font-inter text-sm font-medium text-[#2B3A55]">
@@ -375,8 +383,8 @@ export function ProductPage() {
                     <input
                       type="email"
                       required
-                      className="w-full rounded-lg border border-gray-300 p-3 font-inter outline-none focus:border-[#D4A373]" />
-                    
+                      className="w-full rounded-lg border border-gray-300 p-3 font-inter outline-none focus:border-[#D4A373]"
+                    />
                   </div>
                 </div>
                 <div>
@@ -386,13 +394,13 @@ export function ProductPage() {
                   <textarea
                     required
                     rows={4}
-                    className="w-full rounded-lg border border-gray-300 p-3 font-inter outline-none focus:border-[#D4A373]">
-                  </textarea>
+                    className="w-full rounded-lg border border-gray-300 p-3 font-inter outline-none focus:border-[#D4A373]"
+                  ></textarea>
                 </div>
                 <button
                   type="submit"
-                  className="mt-2 rounded-lg bg-[#2B3A55] py-3 font-inter font-semibold text-white transition-transform active:scale-95">
-                  
+                  className="mt-2 rounded-lg bg-[#2B3A55] py-3 font-inter font-semibold text-white transition-transform active:scale-95"
+                >
                   Submit Review
                 </button>
               </form>
@@ -417,12 +425,14 @@ export function ProductPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleAddToCart}
-              className="flex flex-1 items-center justify-center rounded-lg border-2 border-[#2B3A55] py-3 font-inter font-semibold text-[#2B3A55] active:scale-95 transition-colors hover:bg-[#2B3A55] hover:text-white">
+              className="flex flex-1 items-center justify-center rounded-lg border-2 border-[#2B3A55] py-3 font-inter font-semibold text-[#2B3A55] active:scale-95 transition-colors hover:bg-[#2B3A55] hover:text-white"
+            >
               Add to Cart
             </button>
             <button
               onClick={handleWhatsAppOrder}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#D4A373] py-3 font-inter font-semibold text-white active:scale-95">
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#D4A373] py-3 font-inter font-semibold text-white active:scale-95"
+            >
               <MessageCircle className="h-5 w-5" />
               WhatsApp
             </button>
@@ -432,47 +442,48 @@ export function ProductPage() {
 
       {/* Size Guide Modal */}
       <AnimatePresence>
-        {isSizeGuideOpen &&
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        {isSizeGuideOpen && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
             <motion.div
-            initial={{
-              opacity: 0
-            }}
-            animate={{
-              opacity: 1
-            }}
-            exit={{
-              opacity: 0
-            }}
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setIsSizeGuideOpen(false)} />
-          
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+              }}
+              exit={{
+                opacity: 0,
+              }}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setIsSizeGuideOpen(false)}
+            />
+
             <motion.div
-            initial={{
-              opacity: 0,
-              scale: 0.95,
-              y: 20
-            }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              y: 0
-            }}
-            exit={{
-              opacity: 0,
-              scale: 0.95,
-              y: 20
-            }}
-            className="relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-            
+              initial={{
+                opacity: 0,
+                scale: 0.95,
+                y: 20,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.95,
+                y: 20,
+              }}
+              className="relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto"
+            >
               <div className="mb-6 flex items-center justify-between">
                 <h3 className="font-fraunces text-2xl text-[#2B3A55]">
                   Size Guide
                 </h3>
                 <button
-                onClick={() => setIsSizeGuideOpen(false)}
-                className="p-2 text-gray-500">
-                
+                  onClick={() => setIsSizeGuideOpen(false)}
+                  className="p-2 text-gray-500"
+                >
                   <X className="h-6 w-6" />
                 </button>
               </div>
@@ -532,8 +543,8 @@ export function ProductPage() {
               </p>
             </motion.div>
           </div>
-        }
+        )}
       </AnimatePresence>
-    </main>);
-
+    </main>
+  );
 }

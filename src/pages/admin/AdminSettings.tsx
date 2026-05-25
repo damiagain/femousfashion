@@ -1,72 +1,86 @@
-import React, { useState, useRef } from 'react';
-import { Upload, Save, Image as ImageIcon } from 'lucide-react';
-import { toast } from 'sonner';
-import { useSettingsStore, SiteSettings } from '../../data/settingsStore';
-import { supabaseAdmin } from '../../lib/supabase';
+import React, { useEffect, useState, useRef } from "react";
+
+import { Upload, Save, Image as ImageIcon } from "lucide-react";
+import { toast } from "sonner";
+import { useSettingsStore, SiteSettings } from "../../data/settingsStore";
+import { supabaseAdmin } from "../../lib/supabase";
 
 export function AdminSettings() {
-  const { settings, updateSettings } = useSettingsStore();
+  const { settings, fetchSettings, updateSettings } = useSettingsStore();
   const [formData, setFormData] = useState<SiteSettings>(settings);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadTarget, setUploadTarget] = useState<{ type: 'hero' | 'story' | 'category', key?: string } | null>(null);
+  const [uploadTarget, setUploadTarget] = useState<{
+    type: "hero" | "story" | "category";
+    key?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    // Ensure we load the latest settings.json before rendering/editing
+    fetchSettings();
+  }, [fetchSettings]);
+
+  useEffect(() => {
+    // Keep local form in sync with store updates (e.g. after fetchSettings)
+    setFormData(settings);
+  }, [settings]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0] && uploadTarget) {
       const file = e.target.files[0];
       if (file.size > 2 * 1024 * 1024) {
-        toast.error('Image exceeds 2MB limit');
+        toast.error("Image exceeds 2MB limit");
         return;
       }
-      
-      const toastId = toast.loading('Uploading image...');
+
+      const toastId = toast.loading("Uploading image...");
       try {
-        const fileExt = file.name.split('.').pop();
+        const fileExt = file.name.split(".").pop();
         const fileName = `settings_${Date.now()}.${fileExt}`;
-        
+
         const { error } = await supabaseAdmin.storage
-          .from('product-images')
+          .from("product-images")
           .upload(fileName, file);
-          
+
         if (error) throw error;
-        
+
         const { data } = supabaseAdmin.storage
-          .from('product-images')
+          .from("product-images")
           .getPublicUrl(fileName);
-          
+
         const publicUrl = data.publicUrl;
-        
-        setFormData(prev => {
-          if (uploadTarget.type === 'hero') {
+
+        setFormData((prev) => {
+          if (uploadTarget.type === "hero") {
             return { ...prev, heroImage: publicUrl };
           }
-          if (uploadTarget.type === 'story') {
+          if (uploadTarget.type === "story") {
             return { ...prev, ourStoryImage: publicUrl };
           }
-          if (uploadTarget.type === 'category' && uploadTarget.key) {
+          if (uploadTarget.type === "category" && uploadTarget.key) {
             return {
               ...prev,
               categoryImages: {
                 ...prev.categoryImages,
-                [uploadTarget.key]: publicUrl
-              }
+                [uploadTarget.key]: publicUrl,
+              },
             };
           }
           return prev;
         });
-        
-        toast.success('Image uploaded successfully', { id: toastId });
+
+        toast.success("Image uploaded successfully", { id: toastId });
       } catch (err) {
         console.error(err);
-        toast.error('Failed to upload image', { id: toastId });
+        toast.error("Failed to upload image", { id: toastId });
       } finally {
         setUploadTarget(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
     }
   };
 
-  const triggerUpload = (type: 'hero' | 'story' | 'category', key?: string) => {
+  const triggerUpload = (type: "hero" | "story" | "category", key?: string) => {
     setUploadTarget({ type, key });
     fileInputRef.current?.click();
   };
@@ -75,9 +89,9 @@ export function AdminSettings() {
     setIsSaving(true);
     const success = await updateSettings(formData);
     if (success) {
-      toast.success('Settings saved successfully');
+      toast.success("Settings saved successfully");
     } else {
-      toast.error('Failed to save settings');
+      toast.error("Failed to save settings");
     }
     setIsSaving(false);
   };
@@ -96,9 +110,10 @@ export function AdminSettings() {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="flex items-center justify-center gap-2 rounded-lg bg-[#2B3A55] px-6 py-3 font-inter font-semibold text-white transition-transform active:scale-95 disabled:opacity-50">
+          className="flex items-center justify-center gap-2 rounded-lg bg-[#2B3A55] px-6 py-3 font-inter font-semibold text-white transition-transform active:scale-95 disabled:opacity-50"
+        >
           <Save className="h-5 w-5" />
-          {isSaving ? 'Saving...' : 'Save Settings'}
+          {isSaving ? "Saving..." : "Save Settings"}
         </button>
       </div>
 
@@ -116,13 +131,22 @@ export function AdminSettings() {
           <h2 className="font-fraunces text-xl text-[#2B3A55] border-b border-gray-100 pb-4">
             Main Site Images
           </h2>
-          
+
           <div className="flex flex-col gap-3">
-            <label className="font-inter text-sm font-medium text-[#2B3A55]">Hero Banner Image</label>
+            <label className="font-inter text-sm font-medium text-[#2B3A55]">
+              Hero Banner Image
+            </label>
             <div className="relative h-48 rounded-xl border-2 border-dashed border-gray-300 overflow-hidden group">
-              <img src={formData.heroImage} alt="Hero" className="w-full h-full object-cover" />
+              <img
+                src={formData.heroImage}
+                alt="Hero"
+                className="w-full h-full object-cover"
+              />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button onClick={() => triggerUpload('hero')} className="bg-white text-[#2B3A55] px-4 py-2 rounded-lg font-medium flex items-center gap-2 text-sm">
+                <button
+                  onClick={() => triggerUpload("hero")}
+                  className="bg-white text-[#2B3A55] px-4 py-2 rounded-lg font-medium flex items-center gap-2 text-sm"
+                >
                   <Upload className="h-4 w-4" /> Change Image
                 </button>
               </div>
@@ -130,11 +154,20 @@ export function AdminSettings() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <label className="font-inter text-sm font-medium text-[#2B3A55]">Our Story Image</label>
+            <label className="font-inter text-sm font-medium text-[#2B3A55]">
+              Our Story Image
+            </label>
             <div className="relative h-48 rounded-xl border-2 border-dashed border-gray-300 overflow-hidden group">
-              <img src={formData.ourStoryImage} alt="Our Story" className="w-full h-full object-cover" />
+              <img
+                src={formData.ourStoryImage}
+                alt="Our Story"
+                className="w-full h-full object-cover"
+              />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button onClick={() => triggerUpload('story')} className="bg-white text-[#2B3A55] px-4 py-2 rounded-lg font-medium flex items-center gap-2 text-sm">
+                <button
+                  onClick={() => triggerUpload("story")}
+                  className="bg-white text-[#2B3A55] px-4 py-2 rounded-lg font-medium flex items-center gap-2 text-sm"
+                >
                   <Upload className="h-4 w-4" /> Change Image
                 </button>
               </div>
@@ -147,17 +180,24 @@ export function AdminSettings() {
           <h2 className="font-fraunces text-xl text-[#2B3A55] border-b border-gray-100 pb-4">
             Category Images
           </h2>
-          
+
           <div className="grid grid-cols-2 gap-4">
             {Object.entries(formData.categoryImages).map(([key, url]) => (
               <div key={key} className="flex flex-col gap-2">
                 <label className="font-inter text-xs font-medium text-[#2B3A55] uppercase tracking-wider">
-                  {key.replace('-', ' ')}
+                  {key.replace("-", " ")}
                 </label>
                 <div className="relative aspect-[4/5] rounded-xl border-2 border-dashed border-gray-300 overflow-hidden group">
-                  <img src={url} alt={key} className="w-full h-full object-cover" />
+                  <img
+                    src={url}
+                    alt={key}
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button onClick={() => triggerUpload('category', key)} className="bg-white text-[#2B3A55] p-2 rounded-full">
+                    <button
+                      onClick={() => triggerUpload("category", key)}
+                      className="bg-white text-[#2B3A55] p-2 rounded-full"
+                    >
                       <Upload className="h-4 w-4" />
                     </button>
                   </div>
