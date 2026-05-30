@@ -204,7 +204,7 @@ export function ShopPage() {
                   }}
                   className="rounded-lg bg-[#2B3A55] px-6 py-3 font-inter font-semibold text-white transition-transform hover:scale-105 active:scale-95"
                 >
-                  Clear Filtersssss
+                  Clear Filters
                 </button>
               </div>
             )}

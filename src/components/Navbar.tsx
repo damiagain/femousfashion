@@ -63,13 +63,9 @@ export function Navbar() {
 
           {/* Logo (side-by-side on both desktop + mobile) */}
           <Link to="/" className="flex items-center gap-2">
-            {/* <img
-              src="/sitelogo.png"
-              alt="Femous Fashion Logo"
-              className="h-10 w-auto object-contain md:h-12"
-            /> */}
+            
               <img
-                    src="/my-logo1.png"
+                    src="/sitelogo.png"
                     alt="Femous Fashion"
                     className="h-10 w-auto object-contain md:h-12"
                   />
