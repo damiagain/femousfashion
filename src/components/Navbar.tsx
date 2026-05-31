@@ -63,12 +63,11 @@ export function Navbar() {
 
           {/* Logo (side-by-side on both desktop + mobile) */}
           <Link to="/" className="flex items-center gap-2">
-            
-              <img
-                    src="/sitelogo.png"
-                    alt="Femous Fashion"
-                    className="h-10 w-auto object-contain md:h-12"
-                  />
+            <img
+              src="/sitelogo.png"
+              alt="Femous Fashion"
+              className="h-10 w-auto object-contain md:h-12"
+            />
           </Link>
 
           {/* Desktop Nav */}
@@ -169,18 +168,11 @@ export function Navbar() {
               className="fixed bottom-0 left-0 top-0 z-50 w-[80%] max-w-sm bg-[#FDFBF7] p-6 shadow-xl"
             >
               <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-2">
-                  <img
-                    src="/sitelogo.png"
-                    alt="Femous Fashion Logo"
-                    className="h-7 w-auto object-contain"
-                  />
-                  <img
-                    src="/my logo1.png"
-                    alt="Femous Fashion"
-                    className="h-7 w-auto object-contain"
-                  />
-                </div>
+                <img
+                  src="/sitelogo.png"
+                  alt="Femous Fashion"
+                  className="h-8 w-auto object-contain"
+                />
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="p-2 text-[#2B3A55]"

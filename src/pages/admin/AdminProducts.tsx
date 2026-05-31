@@ -444,9 +444,7 @@ export function AdminProducts() {
                 </div>
 
                 {/* Conditional Size Selector */}
-                {["native-wears", "casual-wears", "street-wears"].includes(
-                  formData.category || "",
-                ) && (
+                {formData.category !== "accessories" && (
                   <div>
                     <label className="mb-2 block font-inter text-sm font-medium text-[#2B3A55]">
                       Available Sizes
