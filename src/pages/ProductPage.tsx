@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useReviewsStore } from "../data/reviewStore";
 import {
   ChevronRight,
   ShieldCheck,
@@ -34,6 +35,26 @@ export function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { reviews, addReview } = useReviewsStore(id);
+  const [reviewForm, setReviewForm] = useState({
+    name: "",
+    email: "",
+    rating: 0,
+    text: "",
+  });
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (reviewForm.rating === 0) {
+      toast.error("Please select a rating");
+      return;
+    }
+    const success = await addReview({ ...reviewForm, productId: id! });
+    if (success) {
+      toast.success("Review submitted!");
+      setReviewForm({ name: "", email: "", rating: 0, text: "" });
+    }
+  };
   useEffect(() => {
     window.scrollTo(0, 0);
     setIsLoading(true);
@@ -295,56 +316,52 @@ export function ProductPage() {
           <h2 className="mb-8 font-fraunces text-2xl text-[#2B3A55] md:text-3xl">
             Customer Reviews
           </h2>
-
           <div className="flex flex-col gap-12 md:flex-row">
             <div className="flex-1">
-              {/* Mock Reviews List */}
-              <div className="flex flex-col gap-8">
-                <div className="border-b border-gray-100 pb-6">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="font-inter font-semibold text-[#2B3A55]">
-                      Oluwaseun A.
-                    </span>
-                    <span className="font-inter text-sm text-gray-500">
-                      2 weeks ago
-                    </span>
-                  </div>
-                  <StarRating rating={5} />
-                  <p className="mt-3 font-inter text-gray-600">
-                    Absolutely love this piece. The quality is top-notch and it
-                    fits perfectly.
-                  </p>
-                </div>
-                <div className="border-b border-gray-100 pb-6">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="font-inter font-semibold text-[#2B3A55]">
-                      Michael K.
-                    </span>
-                    <span className="font-inter text-sm text-gray-500">
-                      1 month ago
-                    </span>
-                  </div>
-                  <StarRating rating={4} />
-                  <p className="mt-3 font-inter text-gray-600">
-                    Great fabric and stitching. Delivery to UK was faster than
-                    expected.
-                  </p>
-                  <div className="mt-4 rounded-lg bg-[#F5F2EB] p-4">
-                    <div className="mb-1 flex items-center gap-2">
-                      <span className="rounded bg-[#D4A373] px-2 py-0.5 text-[10px] font-bold text-white">
-                        ADMIN
-                      </span>
-                      <span className="font-inter text-sm font-semibold text-[#2B3A55]">
-                        Femous Fashion
-                      </span>
+              {reviews.length === 0 ? (
+                <p className="font-inter text-gray-500">
+                  No reviews yet. Be the first!
+                </p>
+              ) : (
+                <div className="flex flex-col gap-8">
+                  {reviews.map((review) => (
+                    <div
+                      key={review.id}
+                      className="border-b border-gray-100 pb-6"
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="font-inter font-semibold text-[#2B3A55]">
+                          {review.name}
+                        </span>
+                        <span className="font-inter text-sm text-gray-500">
+                          {new Date(review.createdAt).toLocaleDateString(
+                            "en-GB",
+                          )}
+                        </span>
+                      </div>
+                      <StarRating rating={review.rating} />
+                      <p className="mt-3 font-inter text-gray-600">
+                        {review.text}
+                      </p>
+                      {review.adminReply && (
+                        <div className="mt-4 rounded-lg bg-[#F5F2EB] p-4">
+                          <div className="mb-1 flex items-center gap-2">
+                            <span className="rounded bg-[#D4A373] px-2 py-0.5 text-[10px] font-bold text-white">
+                              ADMIN
+                            </span>
+                            <span className="font-inter text-sm font-semibold text-[#2B3A55]">
+                              Femous Fashion
+                            </span>
+                          </div>
+                          <p className="font-inter text-sm text-gray-600">
+                            {review.adminReply}
+                          </p>
+                        </div>
+                      )}
                     </div>
-                    <p className="font-inter text-sm text-gray-600">
-                      Thank you for your patronage, Michael! We're glad you love
-                      it.
-                    </p>
-                  </div>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Add Review Form */}
@@ -354,16 +371,20 @@ export function ProductPage() {
               </h3>
               <form
                 className="flex flex-col gap-4"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  toast.success("Review submitted for approval");
-                }}
+                onSubmit={handleReviewSubmit}
               >
                 <div>
                   <label className="mb-1 block font-inter text-sm font-medium text-[#2B3A55]">
                     Rating
                   </label>
-                  <StarRating rating={0} interactive size={24} />
+                  <StarRating
+                    rating={reviewForm.rating}
+                    interactive
+                    size={24}
+                    onChange={(r) =>
+                      setReviewForm({ ...reviewForm, rating: r })
+                    }
+                  />
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
@@ -373,6 +394,10 @@ export function ProductPage() {
                     <input
                       type="text"
                       required
+                      value={reviewForm.name}
+                      onChange={(e) =>
+                        setReviewForm({ ...reviewForm, name: e.target.value })
+                      }
                       className="w-full rounded-lg border border-gray-300 p-3 font-inter outline-none focus:border-[#D4A373]"
                     />
                   </div>
@@ -383,6 +408,10 @@ export function ProductPage() {
                     <input
                       type="email"
                       required
+                      value={reviewForm.email}
+                      onChange={(e) =>
+                        setReviewForm({ ...reviewForm, email: e.target.value })
+                      }
                       className="w-full rounded-lg border border-gray-300 p-3 font-inter outline-none focus:border-[#D4A373]"
                     />
                   </div>
@@ -394,8 +423,12 @@ export function ProductPage() {
                   <textarea
                     required
                     rows={4}
+                    value={reviewForm.text}
+                    onChange={(e) =>
+                      setReviewForm({ ...reviewForm, text: e.target.value })
+                    }
                     className="w-full rounded-lg border border-gray-300 p-3 font-inter outline-none focus:border-[#D4A373]"
-                  ></textarea>
+                  />
                 </div>
                 <button
                   type="submit"

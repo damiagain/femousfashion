@@ -7,11 +7,10 @@ import { categories } from "../data/categories";
 import { ProductCard } from "../components/ProductCard";
 import { SkeletonCard } from "../components/SkeletonCard";
 export function ShopPage() {
-  const { products } = useProductsStore();
+  const { products, isLoading } = useProductsStore();
   const { categorySlug } = useParams<{
     categorySlug?: string;
   }>();
-  const [isLoading, setIsLoading] = useState(true);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Filters state (strictly derived from URL)
@@ -20,14 +19,6 @@ export function ShopPage() {
   );
 
   const [sortOption, setSortOption] = useState("newest");
-  useEffect(() => {
-    // Simulate loading state
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [categorySlug, selectedCategories, sortOption]);
   // Update selected category when URL changes
   useEffect(() => {
     if (categorySlug) {
@@ -72,7 +63,7 @@ export function ShopPage() {
         break;
     }
     return result;
-  }, [selectedCategories, sortOption]);
+  }, [products, selectedCategories, sortOption]);
   const FilterContent = () => (
     <div className="flex flex-col gap-8">
       <div>

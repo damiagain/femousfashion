@@ -1,45 +1,43 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 
 export interface SiteSettings {
   heroImage: string;
   categoryImages: {
-    'native-wears': string;
-    'corporate-wears': string;
-    'street-wears': string;
-    'casual-wears': string;
-    'accessories': string;
-    'fabrics': string;
-    [key: string]: string; // Index signature for dynamic access
+    "native-wears": string;
+    "corporate-wears": string;
+    "street-wears": string;
+    "casual-wears": string;
+    accessories: string;
+    fabrics: string;
+    [key: string]: string;
   };
   ourStoryImage: string;
 }
 
 export const defaultSettings: SiteSettings = {
-  heroImage: '/hero.jpeg',
+  heroImage: "/hero.jpeg",
   categoryImages: {
-    'native-wears': '/native.jpeg',
-    'corporate-wears': '/story.jpeg',
-    'street-wears': '/streetwear.jpeg',
-    'casual-wears': '/casual.jpeg',
-    'accessories': '/accesories.jpeg',
-    'fabrics': '/fabric.jpeg',
+    "native-wears": "/native.jpeg",
+    "corporate-wears": "/story.jpeg",
+    "street-wears": "/streetwear.jpeg",
+    "casual-wears": "/casual.jpeg",
+    accessories: "/accesories.jpeg",
+    fabrics: "/fabric.jpeg",
   },
-  ourStoryImage: '/story.jpeg',
+  ourStoryImage: "/story.jpeg",
 };
 
 let globalSettings: SiteSettings = defaultSettings;
 let isLoaded = false;
-let isLoading = false;
 const subscribers: Set<() => void> = new Set();
-
 const notify = () => subscribers.forEach((cb) => cb());
 
 export function useSettingsStore() {
   const [settings, setSettingsState] = useState(globalSettings);
 
   useEffect(() => {
-    const handleUpdate = () => setSettingsState(globalSettings);
+    const handleUpdate = () => setSettingsState({ ...globalSettings });
     subscribers.add(handleUpdate);
     return () => {
       subscribers.delete(handleUpdate);
@@ -47,38 +45,36 @@ export function useSettingsStore() {
   }, []);
 
   const fetchSettings = async () => {
-    if (isLoaded || isLoading) return;
-    isLoading = true;
+    if (isLoaded) return;
     try {
-      const { data } = supabase.storage.from('product-images').getPublicUrl('settings.json');
-      const res = await fetch(`${data.publicUrl}?t=${Date.now()}`);
-      if (res.ok) {
-        const fetchedSettings = await res.json();
-        globalSettings = { ...defaultSettings, ...fetchedSettings };
-        isLoaded = true;
-        notify();
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("data")
+        .eq("id", 1)
+        .single();
+
+      if (error) throw error;
+      if (data?.data && Object.keys(data.data).length > 0) {
+        globalSettings = { ...defaultSettings, ...data.data };
       }
+      isLoaded = true;
+      notify();
     } catch (e) {
-      console.error('Failed to load settings', e);
-    } finally {
-      isLoading = false;
+      console.error("Failed to load settings", e);
     }
   };
 
   const updateSettings = async (newSettings: SiteSettings) => {
     try {
-      const jsonStr = JSON.stringify(newSettings);
-      const file = new Blob([jsonStr], { type: 'application/json' });
-      
-      const { supabaseAdmin } = await import('../lib/supabase');
-      
-      const { error } = await supabaseAdmin.storage
-        .from('product-images')
-        .upload('settings.json', file, { upsert: true, contentType: 'application/json' });
-        
+      const { error } = await supabase
+        .from("site_settings")
+        .update({ data: newSettings, updated_at: new Date().toISOString() })
+        .eq("id", 1);
+
       if (error) throw error;
-      
+
       globalSettings = newSettings;
+      isLoaded = true;
       notify();
       return true;
     } catch (e) {
