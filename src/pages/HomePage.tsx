@@ -19,76 +19,41 @@ export function HomePage() {
         <div
           className="absolute inset-0 z-0 bg-cover bg-center pointer-events-none"
           style={{
-            backgroundImage: `linear-gradient(rgba(43,58,85,0.4), rgba(43,58,85,0.4)), url('${settings.heroImage}')`,
+            backgroundImage: `linear-gradient(rgba(43,58,85,0.6), rgba(43,58,85,0.6)), url('${settings.heroImage}')`,
           }}
         />
 
         <div className="relative z-20 flex flex-col items-center px-4 text-center">
           <motion.div
-            initial={{
-              opacity: 0,
-              y: 20,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              duration: 0.6,
-            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             className="mb-6 rounded-full bg-[#D4A373] px-4 py-1.5 text-xs font-bold tracking-widest text-white md:text-sm"
           >
             FROM NIGERIA TO THE WORLD
           </motion.div>
           <motion.h1
-            initial={{
-              opacity: 0,
-              y: 20,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              duration: 0.6,
-              delay: 0.2,
-            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
             className="mb-6 font-fraunces text-[32px] leading-tight text-white md:text-[56px]"
           >
             Confidently Styled. <br className="hidden md:block" />
             Unapologetically You.
           </motion.h1>
           <motion.p
-            initial={{
-              opacity: 0,
-              y: 20,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              duration: 0.6,
-              delay: 0.4,
-            }}
-            className="mb-10 max-w-lg font-inter text-base text-gray-200 md:text-lg"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mb-10 max-w-lg font-inter text-base text-white md:text-lg font-semibold"
           >
             Premium Nigerian menswear blending African heritage with modern
             editorial calm.
           </motion.p>
           <motion.div
-            initial={{
-              opacity: 0,
-              y: 20,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              duration: 0.6,
-              delay: 0.6,
-            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
             className="flex w-full flex-col gap-4 md:w-auto md:flex-row"
           >
             <Link
