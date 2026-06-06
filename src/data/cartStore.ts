@@ -330,9 +330,6 @@ export function buildCartWhatsAppMessage(items: CartItem[]): string {
   const total = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
   msg += `\nTotal: ₦${total.toLocaleString("en-NG")}\n\n`;
 
-  const cartLink = `${window.location.origin}/cart?token=${encodeURIComponent(token)}`;
-  msg += `View Order Details: ${cartLink}\n\n`;
-
   msg += `Please confirm availability and shipping details. Thank you!`;
   return msg;
 }
@@ -348,7 +345,5 @@ export function buildProductWhatsAppMessage(
   const items = [{ product, size, quantity } as CartItem];
   storeSharedCart(token, items);
 
-  const cartLink = `${window.location.origin}/cart?token=${encodeURIComponent(token)}`;
-
-  return `Hi Femous Fashion! I'm interested in ordering:\n\n${product.name} (Size: ${size}) x${quantity} — ₦${total.toLocaleString("en-NG")}\n\nView Details: ${cartLink}\n\nPlease confirm availability and shipping details. Thank you!`;
+  return `Hi Femous Fashion! I'm interested in ordering:\n\n${product.name} (Size: ${size}) x${quantity} — ₦${total.toLocaleString("en-NG")}\n\nPlease confirm availability and shipping details. Thank you!`;
 }
