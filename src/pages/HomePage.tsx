@@ -17,9 +17,9 @@ export function HomePage() {
       {/* Hero Section */}
       <section className="relative flex min-h-[100vh] w-full items-center justify-center md:min-h-[80vh]">
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center pointer-events-none opacity-50"
+          className="absolute inset-0 z-0 bg-cover bg-center pointer-events-none"
           style={{
-            backgroundImage: `linear-gradient(rgba(43,58,85,0.3), rgba(43,58,85,0.3)), url('${settings.heroImage}')`,
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${settings.heroImage}')`,
           }}
         />
 
